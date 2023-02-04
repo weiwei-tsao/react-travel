@@ -3,14 +3,34 @@ import logo from '../../assets/logo.svg';
 import styles from './Header.module.css';
 import { Layout, Typography, Input, Menu, Button, Dropdown } from 'antd';
 import { GlobalOutlined } from '@ant-design/icons';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
+import { useSelector } from '../../redux/hooks';
+import { useDispatch } from 'react-redux';
 
 interface HeaderProps {}
 
 export const Header: React.FC = (props: HeaderProps) => {
-  const items = [
-    { key: '1', label: '中文' },
-    { key: '2', label: 'En' },
-  ];
+  // const items = [
+  //   { key: '1', label: '中文' },
+  //   { key: '2', label: 'En' },
+  // ];
+
+  const navigate = useNavigate();
+  const params = useParams();
+  const location = useLocation();
+
+  const language = useSelector((state) => state.language);
+  const languageList = useSelector((state) => state.languageList);
+  const dispatch = useDispatch();
+
+  const menuHandler = (event: any) => {
+    const action = {
+      type: 'change_language',
+      payload: event.key,
+    };
+
+    dispatch(action);
+  };
 
   return (
     <div>
@@ -25,23 +45,33 @@ export const Header: React.FC = (props: HeaderProps) => {
               display: 'inline-flex',
               width: 'fit-content',
             }}
-            menu={{ items }}
+            overlay={
+              <Menu
+                onClick={menuHandler}
+                items={languageList.map((l) => ({
+                  key: l.code,
+                  label: l.name,
+                }))}
+              />
+            }
             icon={<GlobalOutlined />}
           >
-            语言
+            {language === 'zh' ? '中文' : 'English'}
           </Dropdown.Button>
           <Button.Group className={styles['button-group']}>
-            <Button>注册</Button>
-            <Button>登陆</Button>
+            <Button onClick={() => navigate('/register')}>注册</Button>
+            <Button onClick={() => navigate('/signin')}>登陆</Button>
           </Button.Group>
         </div>
       </div>
       <div className={styles['app-header']}>
         <Layout.Header className={styles['main-header']}>
-          <img src={logo} alt="logo" className={styles['App-logo']} />
-          <Typography.Title level={3} className={styles.title}>
-            慕课旅游网
-          </Typography.Title>
+          <span onClick={() => navigate('/')}>
+            <img src={logo} alt="logo" className={styles['App-logo']} />
+            <Typography.Title level={3} className={styles.title}>
+              慕课旅游网
+            </Typography.Title>
+          </span>
           <Input.Search
             placeholder="请输入旅游目的地、主题、或关键字"
             className={styles['search-input']}
